@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,12 +22,13 @@ class CustomBroadcastReceiverFragment : Fragment() {
 
     private lateinit var tvReceivedMessage: TextView
     private var message: String? = null
+    private var receiverRegistered = false
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == ACTION_CUSTOM_BROADCAST) {
                 val received = intent.getStringExtra(EXTRA_MESSAGE) ?: "No message"
-                tvReceivedMessage.text = "Received: $received"
+                tvReceivedMessage.text = "✅ Received: $received"
             }
         }
     }
@@ -40,10 +42,15 @@ class CustomBroadcastReceiverFragment : Fragment() {
         message = arguments?.getString("MESSAGE")
         tvReceivedMessage = view.findViewById(R.id.tvReceivedMessage)
 
+        // Show the message that will be broadcast so user knows it was received
+        val tvWaiting: TextView = view.findViewById(R.id.tvWaitingMessage)
+        tvWaiting.text = "Message to broadcast: \"$message\"\nPress the button to send it."
+
         val btnTrigger: Button = view.findViewById(R.id.btnTriggerBroadcast)
         btnTrigger.setOnClickListener {
             val intent = Intent(ACTION_CUSTOM_BROADCAST).apply {
                 putExtra(EXTRA_MESSAGE, message)
+                `package` = requireContext().packageName  // required on Android 14+
             }
             requireContext().sendBroadcast(intent)
         }
@@ -53,12 +60,22 @@ class CustomBroadcastReceiverFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        val filter = IntentFilter(ACTION_CUSTOM_BROADCAST)
-        requireContext().registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        if (!receiverRegistered) {
+            val filter = IntentFilter(ACTION_CUSTOM_BROADCAST)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requireContext().registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                requireContext().registerReceiver(broadcastReceiver, filter)
+            }
+            receiverRegistered = true
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        requireContext().unregisterReceiver(broadcastReceiver)
+        if (receiverRegistered) {
+            requireContext().unregisterReceiver(broadcastReceiver)
+            receiverRegistered = false
+        }
     }
 }
