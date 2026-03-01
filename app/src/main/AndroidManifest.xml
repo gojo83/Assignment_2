@@ -1,28 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Required for loading image from internet and video/audio streaming -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LoginNavigation"
-        tools:targetApi="31">
+        android:theme="@style/Theme.LoginNavigation">
+
+        <!-- MainActivity is the single entry point with the drawer -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- ✅ Ensure HomeActivity is declared here -->
-        <activity android:name=".HomeActivity"/>
+        <!-- HomeActivity (can be removed if you are using fragments for everything) -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

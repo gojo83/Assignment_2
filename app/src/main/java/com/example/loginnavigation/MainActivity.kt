@@ -1,41 +1,72 @@
 package com.example.loginnavigation
 
-
-
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.appcompat.widget.Toolbar
+import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var usernameField: EditText
-    private lateinit var passwordField: EditText
-    private lateinit var loginButton: Button
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var toggle: ActionBarDrawerToggle
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main) // ✅ Ensure the layout is set before accessing views
+        setContentView(R.layout.activity_main)
 
-        // ✅ Initialize views AFTER setting content view
-        usernameField = findViewById(R.id.username)
-        passwordField = findViewById(R.id.password)
-        loginButton = findViewById(R.id.loginButton)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
-        loginButton.setOnClickListener {
-            val username = usernameField.text.toString().trim()
-            val password = passwordField.text.toString().trim()
+        drawerLayout = findViewById(R.id.drawerLayout)
+        val navigationView: NavigationView = findViewById(R.id.navigationView)
 
-            if (username.isNotEmpty() && password.isNotEmpty()) {
-                val intent = Intent(this, HomeActivity::class.java)
-                intent.putExtra("USERNAME", username)
-                startActivity(intent)
-            } else {
-                Toast.makeText(this, "Please enter username & password!", Toast.LENGTH_SHORT).show()
+        toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        // Load default fragment
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, BroadcastFragment())
+                .commit()
+            supportActionBar?.title = "Broadcast Receiver"
+        }
+
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_broadcast -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, BroadcastFragment())
+                        .commit()
+                    supportActionBar?.title = "Broadcast Receiver"
+                }
+                R.id.nav_image_scale -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, ImageScaleFragment())
+                        .commit()
+                    supportActionBar?.title = "Image Scale"
+                }
+                R.id.nav_video -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, VideoFragment())
+                        .commit()
+                    supportActionBar?.title = "Video"
+                }
+                R.id.nav_audio -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, AudioFragment())
+                        .commit()
+                    supportActionBar?.title = "Audio"
+                }
             }
+            drawerLayout.closeDrawers()
+            true
         }
     }
 }
-
